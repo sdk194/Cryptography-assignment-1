@@ -13,6 +13,11 @@ PLAN:
     MAIN PART:
         - Create a function for Cipher Block Chaining
         - Note: The assignment says you can use the built-in aes encryption function from the javax.crypto.* library
+
+    TO DO:
+        - Implement sha-256 hashing
+        - Implement aes cbc
+        - encrypt file
  */
 
 
@@ -68,17 +73,22 @@ public class Assignment1 {
         BigInteger prime = new BigInteger(primeHex, 16);
         BigInteger generator = new BigInteger(generatorHex, 16);
         BigInteger givenKey = new BigInteger(givenKeyHex, 16);
+        String secretKey = "70390995917764513604254768192752813927828121340161866492659666896520349237363420686605146457662486750682910739161370950599554944903809582867798075682681947405884792026785104262651707960691174598872062238218916187716833008177236858888577427594708180069071351782554589687319103134362024870880193867005087176969";
 
-        // Uncomment to generate a new DH, takes first argument from commandline as secret key
-        // Secret key used: 70390995917764513604254768192752813927828121340161866492659666896520349237363420686605146457662486750682910739161370950599554944903809582867798075682681947405884792026785104262651707960691174598872062238218916187716833008177236858888577427594708180069071351782554589687319103134362024870880193867005087176969
-        // genValues(generator, args[0], prime, true);
+        // Uncomment to generate a new DH.txt
+        // genValues(generator, secretKey, prime, true);
+
+        BigInteger sharedSecret = genValues(givenKey, secretKey, prime, false);
+        System.out.println(sharedSecret);
 
 
+        /*
         BigInteger base = new BigInteger("2");
         BigInteger pwr = new BigInteger("25");
         BigInteger mod = new BigInteger("31");
 
         BigInteger x = myModPow(base, pwr, mod);
         System.out.println(x);
+         */
     }
 }
