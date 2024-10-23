@@ -24,6 +24,8 @@ PLAN:
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.prefs.BackingStoreException;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
@@ -69,6 +71,24 @@ public class Assignment1 {
         return value;
     }
 
+    // TESTING, IDK IF THIS CORRECT
+    public static String hashKey(String key) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+            byte[] hash = digest.digest(key.getBytes());
+
+            BigInteger conversion = new BigInteger(1, hash);
+
+            return conversion.toString(16);
+
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println("Error");
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static void main(String[] args) {
         BigInteger prime = new BigInteger(primeHex, 16);
         BigInteger generator = new BigInteger(generatorHex, 16);
@@ -80,6 +100,10 @@ public class Assignment1 {
 
         BigInteger sharedSecret = genValues(givenKey, secretKey, prime, false);
         System.out.println(sharedSecret);
+
+        String hashText = hashKey(sharedSecret.toString());
+
+        System.out.println("hashed text: " + hashText);     // Seems wrong, could be wrong
 
 
         /*
