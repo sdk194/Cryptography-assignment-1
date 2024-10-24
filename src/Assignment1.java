@@ -15,9 +15,9 @@ PLAN:
         - Note: The assignment says you can use the built-in aes encryption function from the javax.crypto.* library
 
     TO DO:
-        - Implement sha-256 hashing
         - Implement aes cbc
         - encrypt file
+        - Don't forget to add leading 0's to where it applies
  */
 
 
@@ -35,6 +35,7 @@ public class Assignment1 {
     static String primeHex = "b59dd79568817b4b9f6789822d22594f376e6a9abc0241846de426e5dd8f6eddef00b465f38f509b2b18351064704fe75f012fa346c5e2c442d7c99eac79b2bc8a202c98327b96816cb8042698ed3734643c4c05164e739cb72fba24f6156b6f47a7300ef778c378ea301e1141a6b25d48f1924268c62ee8dd3134745cdf7323";
     static String generatorHex = "44ec9d52c8f9189e49cd7c70253c2eb3154dd4f08467a64a0267c9defe4119f2e373388cfa350a4e66e432d638ccdc58eb703e31d4c84e50398f9f91677e88641a2d2f6157e2f4ec538088dcf5940b053c622e53bab0b4e84b1465f5738f549664bd7430961d3e5a2e7bceb62418db747386a58ff267a9939833beefb7a6fd68";
     static String givenKeyHex = "5af3e806e0fa466dc75de60186760516792b70fdcd72a5b6238e6f6b76ece1f1b38ba4e210f61a2b84ef1b5dc4151e799485b2171fcf318f86d42616b8fd8111d59552e4b5f228ee838d535b4b987f1eaf3e5de3ea0c403a6c38002b49eade15171cb861b367732460e3a9842b532761c16218c4fea51be8ea0248385f6bac0d";
+    static String secretKeyHex = "643D778E57B550933CCB70EADC13ED3F8DE2634F7AD7179CC31708756DEFFEE27B292757F441C2552CFA1455644940F354052320B99A802AA7B86B62199CA5BE61DB2E784AF3B29AABC97EE0D192BCEA6A2D34B04C133248A03BA008B0ADE1B88BB0949E5E89B5BDC1402F7ADB41D1C1CD0762EA16E8E71ED69639803763D909";
 
     private static void saveDH(String dh) {
         try {
@@ -61,9 +62,8 @@ public class Assignment1 {
     }
 
     // Generate value for DH.txt
-    public static BigInteger genValues(BigInteger n, String secret, BigInteger p, Boolean isDH) {
-        BigInteger b = new BigInteger(secret);
-        BigInteger value = myModPow(n, b, p);
+    public static BigInteger genValues(BigInteger n, BigInteger secret, BigInteger p, boolean isDH) {
+        BigInteger value = myModPow(n, secret, p);
 
         if (isDH) {
             saveDH(value.toString(16));
@@ -93,7 +93,7 @@ public class Assignment1 {
         BigInteger prime = new BigInteger(primeHex, 16);
         BigInteger generator = new BigInteger(generatorHex, 16);
         BigInteger givenKey = new BigInteger(givenKeyHex, 16);
-        String secretKey = "70390995917764513604254768192752813927828121340161866492659666896520349237363420686605146457662486750682910739161370950599554944903809582867798075682681947405884792026785104262651707960691174598872062238218916187716833008177236858888577427594708180069071351782554589687319103134362024870880193867005087176969";
+        BigInteger secretKey = new BigInteger(secretKeyHex, 16);
 
         // Uncomment to generate a new DH.txt
         // genValues(generator, secretKey, prime, true);
