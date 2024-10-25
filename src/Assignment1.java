@@ -21,19 +21,20 @@ PLAN:
  */
 
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import javax.crypto.*;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.*;
 import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.prefs.BackingStoreException;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Assignment1 {
     //Given values
     static String primeHex = "b59dd79568817b4b9f6789822d22594f376e6a9abc0241846de426e5dd8f6eddef00b465f38f509b2b18351064704fe75f012fa346c5e2c442d7c99eac79b2bc8a202c98327b96816cb8042698ed3734643c4c05164e739cb72fba24f6156b6f47a7300ef778c378ea301e1141a6b25d48f1924268c62ee8dd3134745cdf7323";
@@ -60,7 +61,7 @@ public class Assignment1 {
             Scanner reader = new Scanner(test);
             key = reader.nextLine();
             reader.close();
-        } catch(FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         return key;
@@ -89,7 +90,6 @@ public class Assignment1 {
         return value;
     }
 
-    // TESTING, IDK IF THIS CORRECT
     public static String hashKey(String key) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -117,11 +117,53 @@ public class Assignment1 {
         return binary;
     }
 
-    public static void main(String[] args) {
+    public static void encryptFile(File file, BigInteger aesKeyInteger, BigInteger ivInteger) throws IOException,
+            NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException,
+            BadPaddingException, IllegalBlockSizeException {
+        Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
+        byte[] ivByteArray = ivInteger.toByteArray();
+        IvParameterSpec iv;
+        if (ivByteArray.length > 16) {
+            byte[] fixedIV = Arrays.copyOfRange(ivByteArray, 1, ivByteArray.length);
+            iv = new IvParameterSpec(fixedIV);
+            System.out.println(fixedIV.length);
+        }
+        else {
+            System.out.println("iv length: " + ivByteArray.length);
+            iv = new IvParameterSpec(ivByteArray);
+        }
+
+        byte[] aesByteArray = aesKeyInteger.toByteArray();
+        SecretKey aesKey = new SecretKeySpec(aesByteArray, "AES");
+
+        cipher.init(Cipher.ENCRYPT_MODE, aesKey, iv);
+        FileInputStream inputStream = new FileInputStream(file);
+        FileOutputStream outputStream = new FileOutputStream("./src/encryption.txt");
+        byte[] buffer = new byte[16];
+        int bytesRead;
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+            byte[] output = cipher.update(buffer, 0, bytesRead);
+            if (output != null) {
+                outputStream.write(output);
+            }
+        }
+        byte[] outputBytes = cipher.doFinal();
+        if (outputBytes != null) {
+            outputStream.write(outputBytes);
+        }
+        inputStream.close();
+        outputStream.close();
+    }
+
+    public static void main(String[] args) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         BigInteger prime = new BigInteger(primeHex, 16);
         BigInteger generator = new BigInteger(generatorHex, 16);
         BigInteger givenKey = new BigInteger(givenKeyHex, 16);
         BigInteger secretKey = new BigInteger(secretKeyHex, 16);
+
+        String ivHex = getKeyText("./src/IV.txt");
+        BigInteger iv = new BigInteger(ivHex, 16);
+
 
         lookupTable.put(prime, prime.toString(2));
         lookupTable.put(generator, generator.toString(2));
@@ -152,11 +194,18 @@ public class Assignment1 {
         BigInteger dh = new BigInteger(dhHex, 16);
         lookupTable.put(dh, addLeadingZeros(dh.toString(2), 1024));
 
+
+
+
+
         System.out.println("DH in binary: " + lookupTable.get(dh));
         System.out.println("DH in binary bit length: " + lookupTable.get(dh).length());
 
         System.out.println("shared hash in binary: " + lookupTable.get(hash));
         System.out.println("shared hash in binary bit length: " + lookupTable.get(hash).length());
+
+        File toEncrypt = new File("./src/encryption.txt");
+        encryptFile(toEncrypt, hash, iv);
 
         /*
         try {
