@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Scanner;
 import java.util.prefs.BackingStoreException;
 
@@ -39,6 +40,7 @@ public class Assignment1 {
     static String generatorHex = "44ec9d52c8f9189e49cd7c70253c2eb3154dd4f08467a64a0267c9defe4119f2e373388cfa350a4e66e432d638ccdc58eb703e31d4c84e50398f9f91677e88641a2d2f6157e2f4ec538088dcf5940b053c622e53bab0b4e84b1465f5738f549664bd7430961d3e5a2e7bceb62418db747386a58ff267a9939833beefb7a6fd68";
     static String givenKeyHex = "5af3e806e0fa466dc75de60186760516792b70fdcd72a5b6238e6f6b76ece1f1b38ba4e210f61a2b84ef1b5dc4151e799485b2171fcf318f86d42616b8fd8111d59552e4b5f228ee838d535b4b987f1eaf3e5de3ea0c403a6c38002b49eade15171cb861b367732460e3a9842b532761c16218c4fea51be8ea0248385f6bac0d";
     static String secretKeyHex = "643D778E57B550933CCB70EADC13ED3F8DE2634F7AD7179CC31708756DEFFEE27B292757F441C2552CFA1455644940F354052320B99A802AA7B86B62199CA5BE61DB2E784AF3B29AABC97EE0D192BCEA6A2D34B04C133248A03BA008B0ADE1B88BB0949E5E89B5BDC1402F7ADB41D1C1CD0762EA16E8E71ED69639803763D909";
+    static HashMap<BigInteger, String> lookupTable = new HashMap<BigInteger, String>();
 
     private static void saveDH(String dh) {
         try {
@@ -49,6 +51,19 @@ public class Assignment1 {
             System.out.println("Error");
             e.printStackTrace();
         }
+    }
+
+    private static String getKeyText(String fileName) {
+        String key = null;
+        try {
+            File test = new File(fileName);
+            Scanner reader = new Scanner(test);
+            key = reader.nextLine();
+            reader.close();
+        } catch(FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return key;
     }
 
     public static BigInteger myModPow(BigInteger n, BigInteger pwr, BigInteger mod) {
@@ -92,22 +107,58 @@ public class Assignment1 {
         }
     }
 
+    public static String addLeadingZeros(String binary, int bit) {
+        StringBuilder binaryBuilder = new StringBuilder(binary);
+        while (binaryBuilder.length() < bit) {
+            binaryBuilder.insert(0, "0");
+        }
+        binary = binaryBuilder.toString();
+
+        return binary;
+    }
+
     public static void main(String[] args) {
         BigInteger prime = new BigInteger(primeHex, 16);
         BigInteger generator = new BigInteger(generatorHex, 16);
         BigInteger givenKey = new BigInteger(givenKeyHex, 16);
         BigInteger secretKey = new BigInteger(secretKeyHex, 16);
 
+        lookupTable.put(prime, prime.toString(2));
+        lookupTable.put(generator, generator.toString(2));
+        lookupTable.put(givenKey, givenKey.toString(2));
+        lookupTable.put(secretKey, secretKey.toString(2));
+
         // Uncomment to generate a new DH.txt
         // genValues(generator, secretKey, prime, true);
 
         BigInteger sharedSecret = genValues(givenKey, secretKey, prime, false);
-        System.out.println(sharedSecret);
+        // System.out.println(sharedSecret);
 
         String hashText = hashKey(sharedSecret.toString());
+        if (hashText == null) {
+            System.err.println("hashKey seems to have returned with an exception");
+            return;
+        }
+        BigInteger hash = new BigInteger(hashText, 16); // hash is the aes key
+        lookupTable.put(hash, addLeadingZeros(hash.toString(2), 256));
 
-        System.out.println("hashed text: " + hashText);     // Seems wrong, could be wrong
+        // System.out.println("hashed text: " + hashText);     // Seems wrong, could be wrong
 
+        String dhHex = getKeyText("./src/DH.txt");
+        if (dhHex == null || dhHex.isEmpty()) {
+            System.err.println("DH.txt seems to not exist or it is empty");
+            return;
+        }
+        BigInteger dh = new BigInteger(dhHex, 16);
+        lookupTable.put(dh, addLeadingZeros(dh.toString(2), 1024));
+
+        System.out.println("DH in binary: " + lookupTable.get(dh));
+        System.out.println("DH in binary bit length: " + lookupTable.get(dh).length());
+
+        System.out.println("shared hash in binary: " + lookupTable.get(hash));
+        System.out.println("shared hash in binary bit length: " + lookupTable.get(hash).length());
+
+        /*
         try {
             File test = new File("Assignment1.class");
             Scanner reader = new Scanner(test);
@@ -119,7 +170,7 @@ public class Assignment1 {
         } catch(FileNotFoundException e) {
             e.printStackTrace();
         }
-
+        --------------------------------------------------
 
         /*
         BigInteger base = new BigInteger("2");
