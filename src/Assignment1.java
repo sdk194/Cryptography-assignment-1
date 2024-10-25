@@ -108,10 +108,8 @@ public class Assignment1 {
         if (ivByteArray.length > 16) {
             byte[] fixedIV = Arrays.copyOfRange(ivByteArray, 1, ivByteArray.length);
             iv = new IvParameterSpec(fixedIV);
-            System.out.println(fixedIV.length);
         }
         else {
-            System.out.println("iv length: " + ivByteArray.length);
             iv = new IvParameterSpec(ivByteArray);
         }
 
@@ -133,18 +131,6 @@ public class Assignment1 {
         System.arraycopy(message, 0, paddedMessage, 0, messageLength);
 
         paddedMessage[messageLength] = (byte) 0x80;
-        /*
-        System.out.println(paddedMessage.length);
-        System.out.println(paddedMessage.length % 16);
-        System.out.println(newLength);
-        System.out.println(newLength % 16);
-
-         */
-
-        //byte[] output = cipher.update(message, 0, 16);
-        //if (output != null) {
-         //   outputStream.write(output);
-        //}
 
         byte[] outputBytes = cipher.doFinal(paddedMessage);
         System.out.println(new BigInteger(1, outputBytes).toString(16));
@@ -157,7 +143,7 @@ public class Assignment1 {
         BigInteger givenKey = new BigInteger(givenKeyHex, 16);
         BigInteger secretKey = new BigInteger(secretKeyHex, 16);
 
-        String ivHex = getKeyText("./src/IV.txt");
+        String ivHex = getKeyText("./IV.txt");
         BigInteger iv = new BigInteger(ivHex, 16);
 
 
@@ -178,12 +164,10 @@ public class Assignment1 {
             return;
         }
         BigInteger hash = new BigInteger(hashText, 16); // hash is the aes key
-        //System.out.println(hashText);
         lookupTable.put(hash, addLeadingZeros(hash.toString(2), 256));
 
-        // System.out.println("hashed text: " + hashText);     // Seems wrong, could be wrong
 
-        String dhHex = getKeyText("./src/DH.txt");
+        String dhHex = getKeyText("./DH.txt");
         if (dhHex == null || dhHex.isEmpty()) {
             System.err.println("DH.txt seems to not exist or it is empty");
             return;
@@ -193,40 +177,6 @@ public class Assignment1 {
 
 
 
-        encryptFile("./src/Assignment1.class", hash, iv);
-
-
-        /*
-        System.out.println("DH in binary: " + lookupTable.get(dh));
-        System.out.println("DH in binary bit length: " + lookupTable.get(dh).length());
-
-        System.out.println("shared hash in binary: " + lookupTable.get(hash));
-        System.out.println("shared hash in binary bit length: " + lookupTable.get(hash).length());
-
-        File toEncrypt = new File("./src/test.txt");
-        encryptFile("./src/Assignment1.class", hash, iv);
-
-        /*
-        try {
-            File test = new File("Assignment1.class");
-            Scanner reader = new Scanner(test);
-            while (reader.hasNextLine()) {
-                String data = reader.nextLine();
-                System.out.println(data);
-            }
-            reader.close();
-        } catch(FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        --------------------------------------------------
-
-        /*
-        BigInteger base = new BigInteger("2");
-        BigInteger pwr = new BigInteger("25");
-        BigInteger mod = new BigInteger("31");
-
-        BigInteger x = myModPow(base, pwr, mod);
-        System.out.println(x);
-         */
+        encryptFile("./Assignment1.class", hash, iv);
     }
 }
