@@ -21,11 +21,14 @@ PLAN:
  */
 
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Scanner;
 import java.util.prefs.BackingStoreException;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
@@ -104,6 +107,18 @@ public class Assignment1 {
         String hashText = hashKey(sharedSecret.toString());
 
         System.out.println("hashed text: " + hashText);     // Seems wrong, could be wrong
+
+        try {
+            File test = new File("Assignment1.class");
+            Scanner reader = new Scanner(test);
+            while (reader.hasNextLine()) {
+                String data = reader.nextLine();
+                System.out.println(data);
+            }
+            reader.close();
+        } catch(FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
 
         /*
