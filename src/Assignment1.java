@@ -1,24 +1,4 @@
-/*
-PLAN:
-    PRE:
-        - Generate keys
-        - Do the diffie-hellman exchange (steps to do it are in the assignment page)
-        - Figure out a way to read files in java
-            - Pray that the binary file read is indeed in binary lol
-        - Figure out a way to do exclusive or on hexadecimals
-            - If there is no elegant way, create a function to convert hexadecimals to binary
-            - After finishing the entirety of encryption, convert binary back to hexadecimals- Figure out a wa
-        - Figure out how to grab args from command line
 
-    MAIN PART:
-        - Create a function for Cipher Block Chaining
-        - Note: The assignment says you can use the built-in aes encryption function from the javax.crypto.* library
-
-    TO DO:
-        - Implement aes cbc
-        - encrypt file
-        - Don't forget to add leading 0's to where it applies
- */
 
 
 import javax.crypto.*;
@@ -26,6 +6,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
@@ -117,7 +99,7 @@ public class Assignment1 {
         return binary;
     }
 
-    public static void encryptFile(File file, BigInteger aesKeyInteger, BigInteger ivInteger) throws IOException,
+    public static void encryptFile(String fileName, BigInteger aesKeyInteger, BigInteger ivInteger) throws IOException,
             NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException,
             BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
@@ -137,22 +119,36 @@ public class Assignment1 {
         SecretKey aesKey = new SecretKeySpec(aesByteArray, "AES");
 
         cipher.init(Cipher.ENCRYPT_MODE, aesKey, iv);
-        FileInputStream inputStream = new FileInputStream(file);
-        FileOutputStream outputStream = new FileOutputStream("./src/encryption.txt");
-        byte[] buffer = new byte[16];
-        int bytesRead;
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
-            byte[] output = cipher.update(buffer, 0, bytesRead);
-            if (output != null) {
-                outputStream.write(output);
-            }
+        byte[] message = Files.readAllBytes(Path.of(fileName));
+        int messageLength = message.length;
+        int newLength = 0;
+        if (messageLength % 16 != 0) {
+            newLength = (16 - (messageLength % 16)) + messageLength;
         }
-        byte[] outputBytes = cipher.doFinal();
-        if (outputBytes != null) {
-            outputStream.write(outputBytes);
+        else {
+            newLength = messageLength + 16;
         }
-        inputStream.close();
-        outputStream.close();
+        byte[] paddedMessage = new byte[newLength];
+
+        System.arraycopy(message, 0, paddedMessage, 0, messageLength);
+
+        paddedMessage[messageLength] = (byte) 0x80;
+        /*
+        System.out.println(paddedMessage.length);
+        System.out.println(paddedMessage.length % 16);
+        System.out.println(newLength);
+        System.out.println(newLength % 16);
+
+         */
+
+        //byte[] output = cipher.update(message, 0, 16);
+        //if (output != null) {
+         //   outputStream.write(output);
+        //}
+
+        byte[] outputBytes = cipher.doFinal(paddedMessage);
+        System.out.println(new BigInteger(1, outputBytes).toString(16));
+
     }
 
     public static void main(String[] args) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, IOException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
@@ -182,6 +178,7 @@ public class Assignment1 {
             return;
         }
         BigInteger hash = new BigInteger(hashText, 16); // hash is the aes key
+        //System.out.println(hashText);
         lookupTable.put(hash, addLeadingZeros(hash.toString(2), 256));
 
         // System.out.println("hashed text: " + hashText);     // Seems wrong, could be wrong
@@ -196,16 +193,18 @@ public class Assignment1 {
 
 
 
+        encryptFile("./src/Assignment1.class", hash, iv);
 
 
+        /*
         System.out.println("DH in binary: " + lookupTable.get(dh));
         System.out.println("DH in binary bit length: " + lookupTable.get(dh).length());
 
         System.out.println("shared hash in binary: " + lookupTable.get(hash));
         System.out.println("shared hash in binary bit length: " + lookupTable.get(hash).length());
 
-        File toEncrypt = new File("./src/encryption.txt");
-        encryptFile(toEncrypt, hash, iv);
+        File toEncrypt = new File("./src/test.txt");
+        encryptFile("./src/Assignment1.class", hash, iv);
 
         /*
         try {
