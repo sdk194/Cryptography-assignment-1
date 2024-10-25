@@ -156,7 +156,6 @@ public class Assignment1 {
         // genValues(generator, secretKey, prime, true);
 
         BigInteger sharedSecret = genValues(givenKey, secretKey, prime, false);
-        // System.out.println(sharedSecret);
 
         String hashText = hashKey(sharedSecret.toString());
         if (hashText == null) {
