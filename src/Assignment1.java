@@ -30,11 +30,11 @@ public class Assignment1 {
             dhFile.write(dh);
             dhFile.close();
         } catch (IOException e) {
-            System.out.println("Error");
-            e.printStackTrace();
+            System.err.println("DH.txt does not seem to exist or cannot be created");
         }
     }
 
+    // Function that grabs the value of tge IV.txt file
     private static String getKeyText(String fileName) {
         String key = null;
         try {
@@ -42,8 +42,8 @@ public class Assignment1 {
             Scanner reader = new Scanner(test);
             key = reader.nextLine();
             reader.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        } catch (FileNotFoundException | NullPointerException e) {
+            System.err.println("The File does not seem to exist or the pathname is null");
         }
         return key;
     }
@@ -82,8 +82,7 @@ public class Assignment1 {
             return conversion.toString(16);
 
         } catch (NoSuchAlgorithmException e) {
-            System.out.println("Error");
-            e.printStackTrace();
+            System.err.println("The algorithm to create the hash key does not exist");
             return null;
         }
     }
@@ -94,7 +93,7 @@ public class Assignment1 {
         Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
         byte[] ivByteArray = ivInteger.toByteArray();
         IvParameterSpec iv;
-        if (ivByteArray.length > 16) {
+        if (ivByteArray.length > 16) { // Remove leading 0
             byte[] fixedIV = Arrays.copyOfRange(ivByteArray, 1, ivByteArray.length);
             iv = new IvParameterSpec(fixedIV);
         }
