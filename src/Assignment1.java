@@ -13,9 +13,7 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Scanner;
-import java.util.prefs.BackingStoreException;
 
 public class Assignment1 {
     //Given values
