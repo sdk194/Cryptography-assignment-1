@@ -142,6 +142,6 @@ public class Assignment1 {
         BigInteger hash = new BigInteger(hashText, 16); // hash is the aes key
 
 
-        encryptFile("./Assignment1.class", hash, iv);
+        encryptFile(args[0], hash, iv);
     }
 }
